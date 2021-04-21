@@ -6,32 +6,15 @@ def on_button_pressed_a():
 input.on_button_pressed(Button.A, on_button_pressed_a)
 
 def beginGame():
-    global state, targetNumber, unitDigit, tensDigit, guessNumber
-    state = "Init"
+    global targetNumber
     targetNumber = randint(1, MAX_NUMBER)
-    unitDigit = 0
-    tensDigit = 0
-    guessNumber = 0
+    resetVar()
     basic.show_string("?")
 
 def on_button_pressed_ab():
-    global tempGuestNumber, unitDigit, tensDigit, guessNumber
+    global state
     if guessNumber > 0:
-        tempGuestNumber = guessNumber
-        unitDigit = 0
-        tensDigit = 0
-        guessNumber = 0
-        if tempGuestNumber == targetNumber:
-            basic.show_icon(IconNames.YES)
-            soundExpression.happy.play_until_done()
-            basic.pause(2000)
-            beginGame()
-        elif tempGuestNumber > targetNumber:
-            basic.show_icon(IconNames.NO)
-            basic.show_string("Smaller")
-        else:
-            basic.show_icon(IconNames.NO)
-            basic.show_string("Larger")
+        state = "Determine"
 input.on_button_pressed(Button.AB, on_button_pressed_ab)
 
 def on_button_pressed_b():
@@ -41,17 +24,46 @@ def on_button_pressed_b():
     guessNumber = tensDigit * 10 + unitDigit
 input.on_button_pressed(Button.B, on_button_pressed_b)
 
-tempGuestNumber = 0
+def resetVar():
+    global state, unitDigit, tensDigit, guessNumber
+    state = "Init"
+    unitDigit = 0
+    tensDigit = 0
+    guessNumber = 0
 targetNumber = 0
-state = ""
 unitDigit = 0
 guessNumber = 0
 tensDigit = 0
 MAX_NUMBER = 0
+state = ""
+state = "Init"
 MAX_NUMBER = 99
 beginGame()
 
 def on_forever():
-    if guessNumber > 0:
-        basic.show_number(guessNumber)
+    if state == "Init":
+        if guessNumber > 0:
+            basic.show_string(" ")
+            basic.show_number(guessNumber)
+    else:
+        if guessNumber == targetNumber:
+            basic.show_icon(IconNames.YES)
+            soundExpression.happy.play()
+            basic.pause(1000)
+            beginGame()
+        elif guessNumber > targetNumber:
+            basic.show_icon(IconNames.NO)
+            basic.show_icon(IconNames.STICK_FIGURE)
+            soundExpression.sad.play()
+        else:
+            basic.show_icon(IconNames.NO)
+            basic.show_leds("""
+                . . # . .
+                . . # . .
+                # . # . #
+                . . # . .
+                . # # . .
+                """)
+            soundExpression.sad.play()
+        resetVar()
 basic.forever(on_forever)
